@@ -1,4 +1,3 @@
-
 <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
 
 <style>
@@ -17,13 +16,23 @@
         flex-direction: column;
     }
 
-    html, body {margin: 0; height: 100%; overflow: hidden}
+    html, body {
+        margin: 0;
+        height: 100%;
+        overflow: hidden
+    }
 
 </style>
 
 <script>
 
-  const asyncc =  window.__asyncc__ = {};
+
+  let local = false;
+
+  // dom.appendChild('');
+
+
+  const asyncc = window.__asyncc__ = {};
 
   asyncc.latestVersion = 'v/0.1.0';
 
@@ -31,19 +40,19 @@
 
   asyncc.changeIframe = (versionPath) => {
     let iframe = document.getElementsByClassName("main-iframe");
-    if(!iframe){
+    if (!iframe) {
       return alert('Could not find iframe on page.');
     }
 
     console.log('src:', versionPath);
-    iframe.src = asyncc.root + versionPath;
+    // iframe.src = asyncc.root + versionPath;
 
+    iframe.src = versionPath;
     console.log({iframe});
     // iframe.replaceWith(iframe);
     // iframe.location.reload();
     // iframe.contentWindow.location.reload();
   };
-
 
 
 </script>
@@ -58,10 +67,11 @@
         </div>
     </div>
     <div style="display: flex; flex-grow: 1">
-        <iframe id="main-iframe" src="https://async-java.github.io/v/0.1.0" width="100%" height="100%"></iframe>
+        <!--<iframe id="main-iframe" src="https://async-java.github.io/v/0.1.0" width="100%" height="100%"></iframe>-->
+        <iframe id="main-iframe" src="v/0.1.0" width="100%" height="100%"></iframe>
     </div>
 </div>
 
 <script>
-    // asyncc.changeIframe('v/0.1.2');
+  asyncc.changeIframe('v/0.1.2');
 </script>
