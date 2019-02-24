@@ -1,53 +1,17 @@
+<script src="http://shjs.sourceforge.net/sh_main.js"></script>
+<script src="http://shjs.sourceforge.net/lang/sh_java.js"></script>
+<!--<link rel="stylesheet" href="http://shjs.sourceforge.net/sh_style.css">-->
+<!--<link rel="stylesheet" href="http://shjs.sourceforge.net/css/sh_darkblue.css">-->
+<!--<link rel="stylesheet" href="http://shjs.sourceforge.net/css/sh_zellner.css">-->
+<link rel="stylesheet" href="http://shjs.sourceforge.net/css/sh_acid.css">
 
-<!--<script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js?skin=sunburst"></script>-->
-
-<!--<h3 id="concat">Concat</h3>-->
-<!--<p><a name="abcde"></a></p>-->
-<!--<pre lang="java" class="prettyprint">-->
-
- <!--class NeoEach {-->
-   <!---->
-   <!--static {@code <T, V, E> void Each(int limit, Iterable<T> i, Asyncc.IEacher<T, E> m, Asyncc.IEachCallback<E> f)} {-->
-     <!---->
-     <!--final CounterLimit c = new CounterLimit(limit);-->
-     <!--final ShortCircuit s = new ShortCircuit();-->
-     <!--final var iterator = i.iterator();-->
-     <!--RunEach(iterator, c, s, m, f);-->
-     <!--handleSameTickCall(s);-->
-   <!--}-->
-   <!---->
- <!--}-->
-<!--</pre>-->
-
-<!--<h3 id="series">Series</h3>-->
-<!--<p><a name="abcde"></a></p>-->
-<!--<pre lang="java" class="prettyprint">-->
-
- <!--class NeoEach {-->
-   <!---->
-   <!--static {@code <T, V, E>} void Each(int limit, Iterable<T> i, Asyncc.IEacher<T, E> m, Asyncc.IEachCallback<E> f) {-->
-     <!---->
-     <!--final CounterLimit c = new CounterLimit(limit);-->
-     <!--final ShortCircuit s = new ShortCircuit();-->
-     <!--final var iterator = i.iterator();-->
-     <!--RunEach(iterator, c, s, m, f);-->
-     <!--handleSameTickCall(s);-->
-   <!--}-->
-   <!---->
- <!--}-->
-<!--</pre>-->
-
-<!--<h3 id="parallel">Parallel</h3>-->
-<!--<p><a name="abcde"></a></p>-->
-
-<div width="1900px" height="1800px">
 
 <pre class="sh_java">
 
  class NeoEach {
 
     @Suppression()
-   static &lt;T, V, E&gt; void Each(int limit, Iterable&lt;T&gt; i, Asyncc.IEacher&lt;T, E&gt; m, Asyncc.IEachCallback&lt;E&gt; f) {
+   static <T, V, E> void Each(int limit, Iterable&lt;T&gt; i, Asyncc.IEacher&lt;T, E&gt; m, Asyncc.IEachCallback&lt;E&gt; f) {
      
      final CounterLimit c = new CounterLimit(limit);
      final ShortCircuit s = new ShortCircuit();
@@ -59,4 +23,84 @@
  }
 </pre>
 
-</div>
+
+
+<pre class="sh_java">
+
+ class NeoEach {
+
+    @Suppression()
+   static <T, V, E> void Each(int limit, Iterable&lt;T&gt; i, Asyncc.IEacher&lt;T, E&gt; m, Asyncc.IEachCallback&lt;E&gt; f) {
+
+     final CounterLimit c = new CounterLimit(limit);
+     final ShortCircuit s = new ShortCircuit();
+     final var iterator = i.iterator();
+     RunEach(iterator, c, s, m, f);
+     handleSameTickCall(s);
+   }
+
+ }
+</pre>
+
+
+<pre class="sh_java">
+
+ class NeoEach {
+
+    @Suppression()
+   static <T, V, E> void Each(int limit, Iterable&lt;T&gt; i, Asyncc.IEacher&lt;T, E&gt; m, Asyncc.IEachCallback&lt;E&gt; f) {
+
+     final CounterLimit c = new CounterLimit(limit);
+     final ShortCircuit s = new ShortCircuit();
+     final var iterator = i.iterator();
+     RunEach(iterator, c, s, m, f);
+     handleSameTickCall(s);
+   }
+
+ }
+</pre>
+
+
+<pre class="sh_java">
+
+ class NeoEach {
+
+    @Suppression()
+   static <T, V, E> void Each(int limit, Iterable&lt;T&gt; i, Asyncc.IEacher&lt;T, E&gt; m, Asyncc.IEachCallback&lt;E&gt; f) {
+
+     final CounterLimit c = new CounterLimit(limit);
+     final ShortCircuit s = new ShortCircuit();
+     final var iterator = i.iterator();
+     RunEach(iterator, c, s, m, f);
+     handleSameTickCall(s);
+   }
+
+ }
+</pre>
+
+<a name="foo"></a>
+this is the foo section
+<pre class="sh_java">
+
+ class NeoEach {
+
+    @Suppression()
+   static <T, V, E> void Each(int limit, Iterable&lt;T&gt; i, Asyncc.IEacher&lt;T, E&gt; m, Asyncc.IEachCallback&lt;E&gt; f) {
+
+     final CounterLimit c = new CounterLimit(limit);
+     final ShortCircuit s = new ShortCircuit();
+     final var iterator = i.iterator();
+     RunEach(iterator, c, s, m, f);
+     handleSameTickCall(s);
+   }
+
+ }
+</pre>
+
+<script>
+  sh_highlightDocument();
+  window.onload = function () {
+    sh_highlightDocument();
+  };
+
+</script>
