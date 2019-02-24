@@ -1,7 +1,7 @@
-<script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
+
 
 <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
-
+<script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
 <style>
     .version-selection-scroll-panel {
         width: 15%;
@@ -54,7 +54,7 @@
         return r.text().then(v => {
           console.log('here is the text:',v);
           // var div = document.createElement("div");
-          el.innerHTML = v;
+          el.innerHTML = `<div width="100%" height="100%">${v}</div>`;
           // el.textContent = v;
           // el.appendChild(div);
         });
@@ -82,5 +82,3 @@
 <script>
   asyncc.changeIframe('v/0.1.2');
 </script>
-
-<script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js?autoload=true"></script>
