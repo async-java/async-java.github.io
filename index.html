@@ -1,4 +1,4 @@
-<script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js?skin=sunburst&autoload=true&lang=java"></script>
+<script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
 
 <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
 
@@ -42,9 +42,9 @@
     iframe.src = versionPath;
   };
 
-  asyncc.newIFrame = () => {
+  asyncc.newIFrame = (v) => {
     const el = document.getElementById('foox');
-    el.innerHTML = '<iframe id="main-iframe" src="v/0.1.0" width="100%" height="100%"></iframe>;';
+    el.innerHTML = `<iframe id="main-iframe" src="${v}" width="100%" height="100%"></iframe>;`;
   };
 
   asyncc.getFrame = () => {
@@ -55,6 +55,7 @@
           console.log('here is the text:',v);
           // var div = document.createElement("div");
           el.innerHTML = v;
+          // el.textContent = v;
           // el.appendChild(div);
         });
       });
@@ -66,11 +67,11 @@
 
     <div class="version-selection-scroll-panel">
         <div class="flex-vertical-container">
-            <button onclick="asyncc.changeIframe('v/0.1.0')">version 0.1.1</button>
-            <button onclick="asyncc.changeIframe('v/0.1.2')">version 0.1.2</button>
-            <button onclick="asyncc.changeIframe('v/0.1.3')">version 0.1.3</button>
+            <button onclick="asyncc.newIFrame('v/0.1.0')">version 0.1.1</button>
+            <button onclick="asyncc.newIFrame('v/0.1.2')">version 0.1.2</button>
+            <button onclick="asyncc.newIFrame('v/0.1.3')">version 0.1.3</button>
             <button onclick="asyncc.getFrame('v/0.1.3')">get markdown</button>
-            <button onclick="asyncc.newIFrame()">new iframe</button>
+            <button onclick="asyncc.newIFrame('v/0.1.0')">new iframe</button>
         </div>
     </div>
     <div id="foox" style="display: flex; flex-grow: 1">
@@ -81,3 +82,5 @@
 <script>
   asyncc.changeIframe('v/0.1.2');
 </script>
+
+<script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js?autoload=true"></script>
