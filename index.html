@@ -1,8 +1,15 @@
 
 
 <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
-<script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
+
+<!--<script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js?skin=sunburst"></script>-->
+
+<script src="https://shjs.sourceforge.net/sh_main.js"></script>
+<script src="https://shjs.sourceforge.net/lang/sh_java.js"></script>
+<link rel="stylesheet" href="https://shjs.sourceforge.net/sh_style.css">
+
 <style>
+
     .version-selection-scroll-panel {
         width: 15%;
         height: 100%;
@@ -54,7 +61,7 @@
         return r.text().then(v => {
           console.log('here is the text:',v);
           // var div = document.createElement("div");
-          el.innerHTML = `<div width="100%" height="100%">${v}</div>`;
+          el.innerHTML = `<div style="overflow: scroll;" width="100%" height="100%">${v}</div>`;
           // el.textContent = v;
           // el.appendChild(div);
         });
@@ -75,7 +82,7 @@
         </div>
     </div>
     <div id="foox" style="display: flex; flex-grow: 1">
-            <iframe id="main-iframe" src="v/0.1.0" width="100%" height="100%"></iframe>
+        <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js?skin=sunburst"></script>
     </div>
 </div>
 
