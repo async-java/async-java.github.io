@@ -50,7 +50,7 @@ Waterfall
 
 A single Java method, ~80 lines, exercising every combinator:
 
-```java
+{% highlight java %}
 public void run(final int regionCount, final IAsyncCallback<Map<String, Recommendation>, Throwable> done) {
 
   final NeoLock regionLock = SharedLocks.byName("composition-region");
@@ -177,7 +177,7 @@ public void run(final int regionCount, final IAsyncCallback<Map<String, Recommen
 
   ), done);
 }
-```
+{% endhighlight %}
 
 ## What this demonstrates
 
