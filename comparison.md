@@ -5,7 +5,7 @@ permalink: /comparison/
 description: async.java compared head-to-head with Akka Streams, Project Reactor, and java.util.concurrent.CompletableFuture. Code samples, conceptual model, performance shape, and decision guide.
 ---
 
-<div class="container container--narrow" style="padding-top: 56px;">
+<div class="container container--narrow" style="padding-top: 56px;" markdown="1">
 
 <h1 style="font-family: var(--font-display); font-size: 36px; letter-spacing: -0.015em; margin: 0 0 12px;">async.java vs the JVM ecosystem</h1>
 

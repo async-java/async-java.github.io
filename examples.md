@@ -5,7 +5,7 @@ permalink: /examples/
 description: Code examples for each async.java combinator — Parallel, Series, Waterfall, Race, Map, Reduce, Queue, Lock, with Loom-friendly idioms and the v0.2.4 ergonomics (c.success, WrapErrFirst.wrap).
 ---
 
-<div class="container container--narrow" style="padding-top: 56px;">
+<div class="container container--narrow" style="padding-top: 56px;" markdown="1">
   <h1 style="font-family: var(--font-display); font-size: 36px; letter-spacing: -0.015em; margin: 0 0 12px;">Examples</h1>
   <p style="font-size: 18px; color: var(--fg-muted); margin: 0 0 16px;">
     One small example per combinator. All snippets compile against <code>com.github.async-java:async.java:v{{ site.latest_version }}</code>.

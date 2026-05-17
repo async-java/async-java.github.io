@@ -5,7 +5,7 @@ permalink: /composability/
 description: Realistic, deeply-nested async.java pipelines showcasing how combinators compose. One end-to-end example using Waterfall, Times, Map, Parallel, ParallelLimit, FilterMap, GroupBy, Race, Reduce, NeoQueue, and NeoLock.
 ---
 
-<div class="container container--narrow" style="padding-top: 56px;">
+<div class="container container--narrow" style="padding-top: 56px;" markdown="1">
 
 <h1 style="font-family: var(--font-display); font-size: 36px; letter-spacing: -0.015em; margin: 0 0 12px;">Composability showcase</h1>
 
@@ -218,7 +218,7 @@ The same pipeline expressed in other JVM async libraries grows by roughly:
 
 | Library             | Approximate LOC | Notes                                                                       |
 |---------------------|----------------:|-----------------------------------------------------------------------------|
-| async.java v0.2.4   |              80 | the code above                                                              |
+| async.java v0.2.5   |              80 | the code above                                                              |
 | CompletableFuture   |        ~140-170 | each fan-out needs `allOf(...).thenApply(v -> List.of(a.join(), b.join()))` |
 | Project Reactor     |        ~110-130 | `Mono.zip` + `flatMap` + `Schedulers.boundedElastic()` per stage             |
 | Akka Streams        |        ~180-220 | `Source.from(...).via(...).mapAsync(...).runWith(...)` per stage             |
