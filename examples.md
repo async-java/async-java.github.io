@@ -206,6 +206,51 @@ lock.acquire((err, unlock) -> {
     unlock.releaseLock();
   }
 });
+
+// Or use the leak-safe sync helper (v0.2.5+):
+lock.withLock(() -> mutate(sharedState));
+{% endhighlight %}
+</div>
+
+<div class="example">
+  <h2 class="example__heading">NeoRwLock <span style="font-family: var(--font-mono); font-size: 14px; color: var(--fg-dim);">(v0.2.6+)</span></h2>
+  <p class="example__lede">Async reader/writer lock. Many concurrent readers, one exclusive writer. FIFO with reader-burst fairness — adjacent queued readers wake up concurrently when the lock becomes free.</p>
+
+{% highlight java %}
+NeoRwLock cacheLock = new NeoRwLock("config-cache");
+
+// Reader — concurrent with other readers.
+cacheLock.acquireRead((err, unlock) -> {
+  try {
+    return cache.get(key);
+  } finally {
+    unlock.releaseLock();
+  }
+});
+
+// Writer — exclusive.
+cacheLock.acquireWrite((err, unlock) -> {
+  try {
+    cache.put(key, value);
+  } finally {
+    unlock.releaseLock();
+  }
+});
+
+// Sync helpers — auto-release even if the body throws.
+cacheLock.withRead(() -> renderTemplate(cache));
+cacheLock.withWrite(() -> cache.refresh());
+
+// Non-blocking attempt — empty if waiters queued (preserves FIFO).
+cacheLock.tryAcquireRead().ifPresent(u -> {
+  try { /* read-only work */ } finally { u.releaseLock(); }
+});
+
+// Bounded wait — fires onError with TimeoutException on miss.
+cacheLock.acquireWrite(500L, (err, unlock) -> {
+  if (err instanceof TimeoutException) { backOff(); return; }
+  // ... exclusive write under the timeout budget
+});
 {% endhighlight %}
 </div>
 
