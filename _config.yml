@@ -1,0 +1,47 @@
+title: async.java
+tagline: Callback-based async control flow for Java that plays nice with Loom
+description: >-
+  async.java is a Java 11+ port of the Node.js async control-flow library.
+  Parallel, Series, Waterfall, Race, Map, Reduce, Queue, Lock —
+  small, predictable, virtual-thread friendly.
+
+baseurl: ""
+url: "https://async-java.github.io"
+
+repo_url: "https://github.com/async-java/async.java"
+latest_version: "0.2.2"
+maven_central: "com.github.async-java:async.java:v0.2.2"
+
+permalink: /blog/:year/:month/:day/:title/
+
+markdown: kramdown
+highlighter: rouge
+kramdown:
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    css_class: highlight
+
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+defaults:
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: post
+
+include:
+  - assets
+
+exclude:
+  - copy.sh
+  - scripts
+  - resources/shjs
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor

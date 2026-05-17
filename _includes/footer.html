@@ -1,0 +1,31 @@
+<footer class="site-footer">
+  <div class="container site-footer__inner">
+    <div class="site-footer__col">
+      <div class="site-footer__title">async.java</div>
+      <p class="site-footer__lede">{{ site.description }}</p>
+      <p class="site-footer__copy">MIT-licensed. Released artifacts on JitPack as <code>{{ site.maven_central }}</code>.</p>
+    </div>
+    <div class="site-footer__col">
+      <div class="site-footer__title">Links</div>
+      <ul class="site-footer__links">
+        <li><a href="{{ site.repo_url }}">GitHub repo</a></li>
+        <li><a href="{{ site.repo_url }}/releases">Releases</a></li>
+        <li><a href="{{ site.repo_url }}/blob/master/CHANGELOG.md">Changelog</a></li>
+        <li><a href="{{ '/v/0.1.0/index.html' | relative_url }}">Javadoc (0.1.0)</a></li>
+      </ul>
+    </div>
+    <div class="site-footer__col">
+      <div class="site-footer__title">Install (JitPack)</div>
+      <pre class="site-footer__snippet"><code>&lt;repository&gt;
+  &lt;id&gt;jitpack.io&lt;/id&gt;
+  &lt;url&gt;https://jitpack.io&lt;/url&gt;
+&lt;/repository&gt;
+
+&lt;dependency&gt;
+  &lt;groupId&gt;com.github.async-java&lt;/groupId&gt;
+  &lt;artifactId&gt;async.java&lt;/artifactId&gt;
+  &lt;version&gt;v{{ site.latest_version }}&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+    </div>
+  </div>
+</footer>

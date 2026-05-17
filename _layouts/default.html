@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {% include head.html %}
+</head>
+<body class="page-{{ page.layout | default: 'default' }}{% if page.body_class %} {{ page.body_class }}{% endif %}">
+  {% include nav.html %}
+  <main class="site-main">
+    {{ content }}
+  </main>
+  {% include footer.html %}
+</body>
+</html>
