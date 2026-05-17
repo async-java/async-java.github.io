@@ -2,7 +2,7 @@
 layout: default
 title: Examples
 permalink: /examples/
-description: Code examples for each async.java combinator — Parallel, Series, Waterfall, Race, Map, Reduce, Queue, Lock, with Loom-friendly idioms.
+description: Code examples for each async.java combinator — Parallel, Series, Waterfall, Race, Map, Reduce, Queue, Lock, with Loom-friendly idioms and the v0.2.4 ergonomics (c.success, WrapErrFirst.wrap).
 ---
 
 <div class="container container--narrow" style="padding-top: 56px;">
@@ -12,21 +12,35 @@ description: Code examples for each async.java combinator — Parallel, Series, 
     Imports are elided for readability.
   </p>
 
+<div style="margin: 24px 0 40px; padding: 16px 22px; border-left: 3px solid var(--accent); background: var(--accent-soft); border-radius: 0 6px 6px 0;">
+  <strong>Conventions used below</strong> &mdash; the continuation parameter is named <code>c</code> (for <em>continuation</em>). Continuations fire via <code>c.success(v)</code>, <code>c.fail(e)</code>, or the canonical <code>c.done(err, v)</code>. The final callback is the error-first callback the combinator takes; wrap it with <code>WrapErrFirst.wrap(...)</code> to skip the <code>if (err != null)...</code> preamble.
+</div>
+
 <div class="example">
   <h2 class="example__heading">Asyncc.Parallel</h2>
   <p class="example__lede">Fan out N independent tasks. The final callback fires once, with results in the same order as the tasks were submitted.</p>
 
 {% highlight java %}
 List<Asyncc.AsyncTask<String, Throwable>> tasks = List.of(
-  cb -> exec.submit(() -> cb.done(null, fetchA())),
-  cb -> exec.submit(() -> cb.done(null, fetchB())),
-  cb -> exec.submit(() -> cb.done(null, fetchC()))
+  c -> exec.submit(() -> c.success(fetchA())),
+  c -> exec.submit(() -> c.success(fetchB())),
+  c -> exec.submit(() -> c.success(fetchC()))
 );
 
 Asyncc.Parallel(tasks, (err, results) -> {
   if (err != null) { log.error("at least one failed", err); return; }
   // results.get(0) is fetchA's value, etc.
 });
+{% endhighlight %}
+
+  <p class="example__lede">Or with <code>wrap</code> to skip the error-check preamble:</p>
+
+{% highlight java %}
+import static org.ores.async.WrapErrFirst.wrap;
+
+Asyncc.Parallel(tasks, wrap(results -> {
+  reply.send(combine(results.get(0), results.get(1), results.get(2)));
+}));
 {% endhighlight %}
 </div>
 
@@ -35,10 +49,11 @@ Asyncc.Parallel(tasks, (err, results) -> {
   <p class="example__lede">Parallel with a concurrency cap. Useful when you have many tasks but want to keep in-flight count bounded.</p>
 
 {% highlight java %}
-Asyncc.ParallelLimit(8, downloadTasks, (err, paths) -> {
+Asyncc.ParallelLimit(8, downloadTasks, wrap(paths -> {
   // At most 8 downloads run concurrently. The next task starts as soon
   // as one finishes. Errors short-circuit the remaining queue.
-});
+  publish(paths);
+}));
 {% endhighlight %}
 </div>
 
@@ -48,9 +63,9 @@ Asyncc.ParallelLimit(8, downloadTasks, (err, paths) -> {
 
 {% highlight java %}
 Asyncc.Series(List.of(
-  cb -> validate(req, cb),
-  cb -> persist(req, cb),
-  cb -> notify(req, cb)
+  c -> validate(req, c),
+  c -> persist(req, c),
+  c -> notify(req, c)
 ), (err, results) -> {
   if (err != null) return; // first failure stops the chain
   // results is a List of each task's value in order.
@@ -64,12 +79,12 @@ Asyncc.Series(List.of(
 
 {% highlight java %}
 Asyncc.Waterfall(List.of(
-  cb -> cb.done(null, parseRequest(raw)),       // ParsedRequest
-  (req, cb) -> cb.done(null, authorize(req)),   // AuthorizedRequest
-  (authd, cb) -> cb.done(null, run(authd))      // Result
-), (err, finalValue) -> {
+  c -> c.success(parseRequest(raw)),       // -> ParsedRequest
+  (req, c) -> c.success(authorize(req)),   // -> AuthorizedRequest
+  (authd, c) -> c.success(run(authd))      // -> Result
+), wrap(finalValue -> {
   // finalValue is the Result from the last stage.
-});
+}));
 {% endhighlight %}
 </div>
 
@@ -79,11 +94,11 @@ Asyncc.Waterfall(List.of(
 
 {% highlight java %}
 Asyncc.Race(List.of(
-  cb -> exec.submit(() -> cb.done(null, fromPrimary())),
-  cb -> exec.submit(() -> cb.done(null, fromReplica()))
-), (err, winnerValue) -> {
+  c -> exec.submit(() -> c.success(fromPrimary())),
+  c -> exec.submit(() -> c.success(fromReplica()))
+), wrap(winnerValue -> {
   // whichever returned first
-});
+}));
 {% endhighlight %}
 </div>
 
@@ -92,11 +107,11 @@ Asyncc.Race(List.of(
   <p class="example__lede">Run an async transform over each element. Results preserve input order even though work runs concurrently.</p>
 
 {% highlight java %}
-Asyncc.Map(userIds, (id, cb) -> {
-  exec.submit(() -> cb.done(null, fetchProfile(id)));
-}, (err, profiles) -> {
+Asyncc.Map(userIds, (id, c) -> {
+  exec.submit(() -> c.success(fetchProfile(id)));
+}, wrap(profiles -> {
   // profiles.get(i) corresponds to userIds.get(i)
-});
+}));
 {% endhighlight %}
 </div>
 
@@ -105,14 +120,14 @@ Asyncc.Map(userIds, (id, cb) -> {
   <p class="example__lede">Async map + async filter in one pass. Tasks that emit <code>null</code> are dropped from the result.</p>
 
 {% highlight java %}
-Asyncc.FilterMap(candidateIds, (id, cb) -> {
+Asyncc.FilterMap(candidateIds, (id, c) -> {
   exec.submit(() -> {
     var profile = fetchProfile(id);
-    cb.done(null, profile.isActive() ? profile : null);
+    c.success(profile.isActive() ? profile : null);
   });
-}, (err, active) -> {
+}, wrap(active -> {
   // active contains only the profiles where isActive() was true
-});
+}));
 {% endhighlight %}
 </div>
 
@@ -121,11 +136,37 @@ Asyncc.FilterMap(candidateIds, (id, cb) -> {
   <p class="example__lede">Sequential fold with an async reducer. Each step sees the running accumulator.</p>
 
 {% highlight java %}
-Asyncc.Reduce(transactions, BigDecimal.ZERO, (acc, txn, cb) -> {
-  exec.submit(() -> cb.done(null, acc.add(txn.amount())));
-}, (err, total) -> {
+Asyncc.Reduce(transactions, BigDecimal.ZERO, (acc, txn, c) -> {
+  exec.submit(() -> c.success(acc.add(txn.amount())));
+}, wrap(total -> {
   // total is the final sum
-});
+}));
+{% endhighlight %}
+</div>
+
+<div class="example">
+  <h2 class="example__heading">Asyncc.Times</h2>
+  <p class="example__lede">Run the same task N times in parallel, collect each result. Useful for "spawn N workers" or "generate N samples".</p>
+
+{% highlight java %}
+Asyncc.Times(8, (i, c) -> {
+  exec.submit(() -> c.success(generateSample(i)));
+}, wrap(samples -> {
+  // samples.size() == 8
+}));
+{% endhighlight %}
+</div>
+
+<div class="example">
+  <h2 class="example__heading">Asyncc.GroupBy</h2>
+  <p class="example__lede">Apply an async keying function to each element, then group input elements by their key.</p>
+
+{% highlight java %}
+Asyncc.GroupBy(users, (user, c) -> {
+  c.success(user.region());
+}, wrap(grouped -> {
+  // grouped is Map<String, List<User>> — users keyed by region
+}));
 {% endhighlight %}
 </div>
 
@@ -134,32 +175,35 @@ Asyncc.Reduce(transactions, BigDecimal.ZERO, (acc, txn, cb) -> {
   <p class="example__lede">A bounded async work queue. Push tasks; the queue serialises (or limits) them. Great when you need backpressure without modelling a stream.</p>
 
 {% highlight java %}
-NeoQueue<Job> queue = new NeoQueue<>(4); // concurrency = 4
+NeoQueue<Job, Void> queue = new NeoQueue<>(4); // concurrency = 4
 
-queue.setTaskHandler((job, cb) -> {
+queue.setTaskHandler((task, c) -> {
   exec.submit(() -> {
-    try { processJob(job); cb.done(null, null); }
-    catch (Throwable t) { cb.done(t, null); }
+    try { processJob(task.getValue()); c.success(null); }
+    catch (Throwable t) { c.fail(t); }
   });
 });
 
-incomingJobs.forEach(queue::push);
+queue.saturated(q -> log.warn("queue saturated; in-flight at cap"));
+queue.drain(q -> log.info("queue drained"));
+
+incoming.forEach(queue::push);
 {% endhighlight %}
 </div>
 
 <div class="example">
   <h2 class="example__heading">NeoLock</h2>
-  <p class="example__lede">An async mutex. Unlike <code>synchronized</code> it doesn't pin a virtual thread to a carrier — useful when the critical section yields.</p>
+  <p class="example__lede">An async mutex. Unlike <code>synchronized</code> it doesn't tie the release to the acquiring thread — useful when the critical section ends inside an async completion handler.</p>
 
 {% highlight java %}
-NeoLock lock = new NeoLock();
+NeoLock lock = new NeoLock("inventory");
 
 lock.acquire((err, unlock) -> {
   try {
     // critical section — safe to await async work here
     mutate(sharedState);
   } finally {
-    unlock.release();
+    unlock.releaseLock();
   }
 });
 {% endhighlight %}
@@ -171,23 +215,26 @@ lock.acquire((err, unlock) -> {
 
 {% highlight java %}
 Asyncc.Waterfall(List.of(
-  cb -> fetchPage(url, cb),                     // String html
-  (html, cb) -> cb.done(null, extractLinks(html)), // List<URI>
-  (links, cb) -> Asyncc.Map(links, (link, c) -> {  // List<List<String>>
+  c -> fetchPage(url, c),                            // -> String html
+  (html, c) -> c.success(extractLinks(html)),        // -> List<URI>
+  (links, c) -> Asyncc.Map(links, (link, inner) -> { // -> List<List<String>>
     Asyncc.Parallel(List.of(
-      c2 -> exec.submit(() -> c2.done(null, headOk(link))),
-      c2 -> exec.submit(() -> c2.done(null, classify(link)))
-    ), (err, pair) -> c.done(err, pair));
-  }, cb)
-), (err, perLinkData) -> {
-  // ...
-});
+      c2 -> exec.submit(() -> c2.success(headOk(link))),
+      c2 -> exec.submit(() -> c2.success(classify(link)))
+    ), inner);
+  }, c)
+), wrap(perLinkData -> {
+  // perLinkData is List<List<String>>, ordered the same as the source links list
+}));
 {% endhighlight %}
+
+  <p class="example__lede">For a much larger composition — 8+ combinators in one pipeline — see <a href="{{ '/composability/' | relative_url }}">the composability showcase</a>.</p>
 </div>
 
 <p style="margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--rule); color: var(--fg-muted); font-size: 15px;">
   Looking for full javadoc?
-  See <a href="{{ '/v/0.1.0/index.html' | relative_url }}">v0.1.0 javadoc</a>, or
+  See the <a href="{{ '/v/latest/index.html' | relative_url }}">latest javadoc</a> or the
+  <a href="{{ '/v/0.2.4/index.html' | relative_url }}">v0.2.4 snapshot</a>, or
   <a href="{{ site.repo_url }}">browse the source</a>.
 </p>
 

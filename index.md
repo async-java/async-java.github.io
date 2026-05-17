@@ -17,17 +17,16 @@ description: A small, predictable, virtual-thread-friendly callback combinator l
       </div>
     </div>
     <div class="hero__code" aria-hidden="false">
-<pre><span class="c-cm">// fan out two enrichment lookups, then score and serialize</span>
+<pre><span class="c-cm">// fan out two enrichment lookups, score, serialize</span>
 <span class="c-kw">final var</span> tasks = <span class="c-ty">List</span>.<span class="c-fn">of</span>(
-  cb <span class="c-kw">-&gt;</span> exec.<span class="c-fn">submit</span>(() <span class="c-kw">-&gt;</span> cb.<span class="c-fn">done</span>(<span class="c-kw">null</span>, lookupA(req))),
-  cb <span class="c-kw">-&gt;</span> exec.<span class="c-fn">submit</span>(() <span class="c-kw">-&gt;</span> cb.<span class="c-fn">done</span>(<span class="c-kw">null</span>, lookupB(req)))
+  c <span class="c-kw">-&gt;</span> exec.<span class="c-fn">submit</span>(() <span class="c-kw">-&gt;</span> c.<span class="c-fn">success</span>(lookupA(req))),
+  c <span class="c-kw">-&gt;</span> exec.<span class="c-fn">submit</span>(() <span class="c-kw">-&gt;</span> c.<span class="c-fn">success</span>(lookupB(req)))
 );
 
-<span class="c-ty">Asyncc</span>.<span class="c-fn">Parallel</span>(tasks, (err, results) <span class="c-kw">-&gt;</span> {
-  <span class="c-kw">if</span> (err != <span class="c-kw">null</span>) { handleError(err); <span class="c-kw">return</span>; }
+<span class="c-ty">Asyncc</span>.<span class="c-fn">Parallel</span>(tasks, <span class="c-fn">wrap</span>(results <span class="c-kw">-&gt;</span> {
   <span class="c-kw">var</span> scored = <span class="c-fn">score</span>(req, results.<span class="c-fn">get</span>(<span class="c-kw">0</span>), results.<span class="c-fn">get</span>(<span class="c-kw">1</span>));
   reply.<span class="c-fn">send</span>(<span class="c-fn">serialize</span>(scored));
-});</pre>
+}));</pre>
     </div>
   </div>
 </section>
@@ -55,7 +54,24 @@ description: A small, predictable, virtual-thread-friendly callback combinator l
       <article class="feature">
         <div class="feature__icon">// predictable</div>
         <h3 class="feature__title">At-most-once final callback</h3>
-        <p class="feature__body">Hardened in v0.2.x with dedup guards, atomic counters, and slot-write-before-counter-increment ordering. Adversarial fuzz tests pin the at-most-once contract across all combinators.</p>
+        <p class="feature__body">Hardened in v0.2.x with dedup guards, atomic counters, slot-write-before-counter-increment ordering, and a v0.2.4 fix for the <code>ArrayList</code> resize race under high-throughput fan-out. Adversarial fuzz tests pin the at-most-once contract across all combinators.</p>
+      </article>
+    </div>
+    <div class="feature-grid" style="margin-top: 28px;">
+      <article class="feature">
+        <div class="feature__icon">// v0.2.4 ergonomics</div>
+        <h3 class="feature__title"><code>c.success(v)</code> / <code>c.fail(e)</code></h3>
+        <p class="feature__body">Shorthand for <code>c.done(null, v)</code> and <code>c.done(e, null)</code>. The continuation parameter is named <code>c</code> &mdash; short for <em>continuation</em> &mdash; everywhere in the docs.</p>
+      </article>
+      <article class="feature">
+        <div class="feature__icon">// no boilerplate</div>
+        <h3 class="feature__title"><code>WrapErrFirst.wrap(...)</code></h3>
+        <p class="feature__body">Wrap a value-only consumer into an error-first callback and skip the <code>if (err != null)...</code> preamble. Throws on unhandled errors; pair with an explicit error consumer if you want both branches.</p>
+      </article>
+      <article class="feature">
+        <div class="feature__icon">// composability</div>
+        <h3 class="feature__title">Combinators nest cleanly</h3>
+        <p class="feature__body"><code>Waterfall</code> wrapping a <code>Map</code> wrapping a <code>Parallel</code> wrapping a <code>Race</code> is a perfectly normal pipeline &mdash; they all use the same error-first callback shape. See the <a href="{{ '/composability/' | relative_url }}">composability showcase</a>.</p>
       </article>
     </div>
   </div>
