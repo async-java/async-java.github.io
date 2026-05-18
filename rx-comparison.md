@@ -166,12 +166,19 @@ public static CompletableFuture<String> runWithAsyncFut(final String inputFrame,
 
 ## Operator mapping
 
-<table style="margin: 24px 0; border-collapse: collapse; width: 100%;">
+The same five-stage pipeline expressed in four orchestrators: F# Rx, async.java callbacks,
+async.java promises, and Akka Streams. The Akka Streams column tracks the production
+[`AkkaStreamsPipeline.java`](https://github.com/oresoftware/k8s-cluster/blob/main/remote/akka-ws-server/src/main/java/com/oresoftware/dd/akkaws/pipeline/AkkaStreamsPipeline.java)
+shape that lives next to the async.java reference in `akka-ws-server`.
+
+<div style="overflow-x: auto;">
+<table style="margin: 24px 0; border-collapse: collapse; width: 100%; min-width: 980px; font-size: 14px;">
   <thead>
     <tr style="background: var(--bg-quiet); border-bottom: 2px solid var(--fg-muted);">
       <th style="text-align: left; padding: 10px; vertical-align: top;">Rx (F#)</th>
       <th style="text-align: left; padding: 10px; vertical-align: top;">async.java callback (Waterfall)</th>
       <th style="text-align: left; padding: 10px; vertical-align: top;">async.java promise (AsyncFut)</th>
+      <th style="text-align: left; padding: 10px; vertical-align: top;">Akka Streams</th>
     </tr>
   </thead>
   <tbody>
@@ -179,29 +186,47 @@ public static CompletableFuture<String> runWithAsyncFut(final String inputFrame,
       <td style="padding: 10px; vertical-align: top;"><code>inbound.SelectMany(fun input -&gt; ...)</code></td>
       <td style="padding: 10px; vertical-align: top;">one <code>runWaterfall</code> call per inbound frame</td>
       <td style="padding: 10px; vertical-align: top;">one <code>runWithAsyncFut</code> call per inbound frame</td>
+      <td style="padding: 10px; vertical-align: top;"><code>Source.single(input).via(flow).runWith(Sink.head(), system)</code> (per-message materialisation)</td>
     </tr>
     <tr style="border-bottom: 1px solid var(--bg-quiet);">
       <td style="padding: 10px; vertical-align: top;"><code>Observable.Return(input).Select(f)</code></td>
       <td style="padding: 10px; vertical-align: top;">Waterfall stage publishing <code>c.success(k, f(x))</code></td>
       <td style="padding: 10px; vertical-align: top;"><code>.thenApply(f)</code></td>
+      <td style="padding: 10px; vertical-align: top;"><code>Flow.&lt;T&gt;create().map(f)</code></td>
     </tr>
     <tr style="border-bottom: 1px solid var(--bg-quiet);">
       <td style="padding: 10px; vertical-align: top;"><code>Observable.Start(fn, TaskPool)</code></td>
       <td style="padding: 10px; vertical-align: top;"><code>exec.execute(() -&gt; try inner.success(fn()) catch inner.fail(t))</code></td>
       <td style="padding: 10px; vertical-align: top;"><code>CompletableFuture.supplyAsync(() -&gt; fn(), exec)</code></td>
+      <td style="padding: 10px; vertical-align: top;"><code>CompletableFuture.supplyAsync(() -&gt; fn(), system.executionContext())</code> inside a <code>mapAsync</code> stage</td>
     </tr>
     <tr style="border-bottom: 1px solid var(--bg-quiet);">
       <td style="padding: 10px; vertical-align: top;"><code>Observable.Zip(a, b, combiner)</code></td>
       <td style="padding: 10px; vertical-align: top;"><code>Asyncc.Parallel(List.of(a, b), (err, results) -&gt; combiner(results.get(0), results.get(1)))</code></td>
       <td style="padding: 10px; vertical-align: top;"><code>AsyncFut.ParallelF(List.of(a, b)).thenApply(combiner)</code></td>
+      <td style="padding: 10px; vertical-align: top;"><code>.mapAsync(2, x -&gt; aFut.thenCombine(bFut, combiner))</code> &mdash; <em>or</em> a <code>Broadcast</code> + <code>Zip</code> subgraph</td>
     </tr>
-    <tr>
+    <tr style="border-bottom: 1px solid var(--bg-quiet);">
       <td style="padding: 10px; vertical-align: top;"><code>body.Catch(fun ex -&gt; errorFrame ex)</code></td>
       <td style="padding: 10px; vertical-align: top;">Waterfall's terminal <code>if (err != null) emitErrorFrame(err)</code> branch</td>
       <td style="padding: 10px; vertical-align: top;"><code>.exceptionally(errorFrame)</code></td>
+      <td style="padding: 10px; vertical-align: top;"><code>.recover(ex -&gt; errorFrame(ex))</code> Flow stage (or a <code>Supervision.Strategy.resumingDecider</code> on the materialiser)</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px; vertical-align: top;"><em>Backpressure</em></td>
+      <td style="padding: 10px; vertical-align: top;">not native &mdash; pair with <a href="/v/latest/org/ores/async/NeoQueue.html"><code>NeoQueue</code></a> for submission-side cap</td>
+      <td style="padding: 10px; vertical-align: top;">not native &mdash; same: <code>NeoQueue</code> or <code>Semaphore</code>-style permits</td>
+      <td style="padding: 10px; vertical-align: top;"><strong>structural</strong> &mdash; demand signal propagates upstream from the sink; <code>buffer(n, overflowStrategy)</code> tunes it per stage</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px; vertical-align: top;"><em>Per-pipeline overhead</em></td>
+      <td style="padding: 10px; vertical-align: top;">~50 µs (heap allocs + atomic counter increments + lambda dispatch)</td>
+      <td style="padding: 10px; vertical-align: top;">~50 µs + one <code>CompletableFuture</code> per stage</td>
+      <td style="padding: 10px; vertical-align: top;">~200&ndash;400 µs per <em>materialisation</em> &mdash; see the <a href="{{ '/blog/2026/05/17/async-java-vs-akka-streams/' | relative_url }}">load-curve breakdown</a> for the source of the gap</td>
     </tr>
   </tbody>
 </table>
+</div>
 
 ## Honest take: when async.java earns its keep over plain `CompletableFuture`
 
