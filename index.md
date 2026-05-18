@@ -77,6 +77,40 @@ description: A small, predictable, virtual-thread-friendly callback combinator l
   </div>
 </section>
 
+<section class="section section--quiet">
+  <div class="container container--narrow" markdown="1">
+
+## What's new in v0.2.9
+
+Two changes, both diagnosed from `AsyncFut.Whilst`'s production behavior:
+
+* **`NeoWhilst.RunMap` race fixed.** A sync-completing body
+  (`AsyncFut.Whilst` with an already-completed `CompletableFuture` &mdash;
+  common in tests and cache-hit paths) was double-dispatching one extra
+  body call past short-circuit. The truth-test ran in two places: inside
+  the per-task `done` callback (which already recurses if the loop
+  should continue) AND in a post-`m.run` block intended for async-body
+  fan-out at `limit > 1`. For sync-completing bodies the post-`m.run`
+  test would re-fire after the chain had already settled. Now gated on
+  `s.isShortCircuited() || taskRunner.isFinished()` &mdash; the
+  async-body fan-out path is unchanged.
+
+* **`Concat`/`ConcatSeries`/`ConcatLimit`/`ConcatDeep`/`ConcatDeepSeries`/`ConcatDeepLimit`
+  task-list variants widened to `List<? extends AsyncTask<T, E>>`.**
+  Same `? extends` treatment we applied to `Parallel`/`Series`/`ParallelLimit`
+  in v0.2.8-rc2. A `List<Asyncc.Task<T>>` (the Throwable-fixed shorthand)
+  now flows into all nine Concat overloads without an explicit cast or
+  defensive copy. Internal `NeoParallel`/`NeoSeries` methods widened too,
+  so the public-API defensive `ArrayList` copy could be elided &mdash; one
+  fewer allocation per `Asyncc.Parallel`/`Series`/`ParallelLimit` call.
+
+Read the full deep-dive: [Tracking down a Whilst race]({{ '/blog/2026/05/18/whilst-race-and-concat-widening/' | relative_url }}).
+
+**192 tests, 0 failures, 2 JDK 21-gated skips.**
+
+  </div>
+</section>
+
 <section class="section section--quiet" id="install">
   <div class="container">
     <p class="section__title">Install</p>
