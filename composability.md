@@ -179,6 +179,89 @@ public void run(final int regionCount, final IAsyncCallback<Map<String, Recommen
 }
 {% endhighlight %}
 
+## Three nesting patterns
+
+Composing combinators is the whole point of the library. async.java supports three styles, each with different trade-offs:
+
+### 1. Callback-style: pass the outer's `c` straight to the inner
+
+The outer combinator's per-task callback **is** the inner combinator's final callback. No glue, no wrapping &mdash; same `IAsyncCallback<V, E>` shape at every level.
+
+{% highlight java %}
+// Series of Parallel: each Series step returns the Parallel's results.
+Asyncc.<List<String>, Throwable>Series(List.of(
+    (Asyncc.Task<List<String>>) c -> Asyncc.<String, Throwable>Parallel(List.of(
+        cb -> exec.submit(() -> cb.success("A1")),
+        cb -> exec.submit(() -> cb.success("A2"))
+    ), c),
+    (Asyncc.Task<List<String>>) c -> Asyncc.<String, Throwable>Parallel(List.of(
+        cb -> exec.submit(() -> cb.success("B1")),
+        cb -> exec.submit(() -> cb.success("B2"))
+    ), c)
+), (err, results) -> {
+    // results: List.of(List.of("A1", "A2"), List.of("B1", "B2"))
+});
+{% endhighlight %}
+
+The `Asyncc.Task<List<String>>` cast (v0.2.8 shorthand for `Asyncc.AsyncTask<List<String>, Throwable>`) tells the lambda that its callback parameter is typed `IAsyncCallback<List<String>, Throwable>` &mdash; which is exactly what the inner `Parallel`'s final callback expects. The two combinators slot together without any adapter code.
+
+### 2. Promise-style with suppliers (deferred start)
+
+Use `() ->` around each inner call. The supplier wrapper means the inner combinator doesn't start until the outer combinator decides to dispatch that task &mdash; necessary for `Series` (sequential ordering) and `ParallelLimit` (capacity-gated).
+
+{% highlight java %}
+CompletableFuture<List<List<String>>> nested = AsyncFut.Parallel(List.of(
+    () -> AsyncFut.Series(List.of(
+        () -> CompletableFuture.completedFuture("A1"),
+        () -> CompletableFuture.completedFuture("A2")
+    )),
+    () -> AsyncFut.Parallel(List.of(
+        () -> CompletableFuture.completedFuture("B1"),
+        () -> CompletableFuture.completedFuture("B2")
+    ))
+));
+{% endhighlight %}
+
+### 3. Promise-style with already-started futures (eager start)
+
+When the inner combinators have already returned their futures &mdash; and eager start is correct semantics (top-level `Parallel`, `Race`) &mdash; drop the `() ->` boilerplate with `AsyncFut.ParallelF` / `RaceF` (v0.2.8):
+
+{% highlight java %}
+CompletableFuture<List<List<String>>> nested = AsyncFut.ParallelF(List.of(
+    AsyncFut.Series(List.of(
+        () -> CompletableFuture.completedFuture("A1"),
+        () -> CompletableFuture.completedFuture("A2")
+    )),
+    AsyncFut.Parallel(List.of(
+        () -> CompletableFuture.completedFuture("B1"),
+        () -> CompletableFuture.completedFuture("B2")
+    ))
+));
+{% endhighlight %}
+
+`ParallelF` and `RaceF` are sugar over the supplier-taking forms (`() -> stage` wrapping happens internally). All semantics &mdash; short-circuit on first failure, ordering, etc. &mdash; are identical.
+
+**Deeply nested** works the same way:
+
+{% highlight java %}
+CompletableFuture<List<List<List<String>>>> deepResult = AsyncFut.ParallelF(List.of(
+    AsyncFut.Series(List.of(
+        () -> AsyncFut.ParallelF(List.of(
+            CompletableFuture.completedFuture("a"),
+            CompletableFuture.completedFuture("b")
+        ))
+    )),
+    AsyncFut.ParallelF(List.of(
+        AsyncFut.Series(List.of(
+            () -> CompletableFuture.completedFuture("c")
+        )),
+        CompletableFuture.completedFuture(List.of("d"))
+    ))
+));
+{% endhighlight %}
+
+---
+
 ## What this demonstrates
 
 * **Every combinator returns to the same error-first callback shape.** A `Waterfall` step's

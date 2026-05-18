@@ -9,8 +9,8 @@ baseurl: ""
 url: "https://async-java.github.io"
 
 repo_url: "https://github.com/async-java/async.java"
-latest_version: "0.2.8-rc1"
-maven_central: "com.github.async-java:async.java:v0.2.8-rc1"
+latest_version: "0.2.8-rc3"
+maven_central: "com.github.async-java:async.java:v0.2.8-rc3"
 
 permalink: /blog/:year/:month/:day/:title/
 
