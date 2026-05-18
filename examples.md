@@ -276,10 +276,86 @@ Asyncc.Waterfall(List.of(
   <p class="example__lede">For a much larger composition — 8+ combinators in one pipeline — see <a href="{{ '/composability/' | relative_url }}">the composability showcase</a>.</p>
 </div>
 
+<div class="example">
+  <h2 class="example__heading">WrapFuture <span style="font-family: var(--font-mono); font-size: 14px; color: var(--fg-dim);">(v0.2.7+)</span></h2>
+  <p class="example__lede">Bidirectional bridge to <code>CompletableFuture</code>. Wrap any combinator call as a promise at the boundary, or wrap a third-party promise as an async.java task.</p>
+
+{% highlight java %}
+import static org.ores.async.WrapFuture.toFuture;
+import static org.ores.async.WrapFuture.fromStage;
+
+// Return a CompletableFuture to a Spring WebFlux / Akka HTTP / gRPC boundary,
+// while using async.java's combinators internally.
+public CompletableFuture<String> handle(Request req) {
+  return toFuture(c ->
+      Asyncc.<String, Throwable>Parallel(List.of(
+          cb -> exec.submit(() -> cb.success(fetchA(req))),
+          cb -> exec.submit(() -> cb.success(fetchB(req)))
+      ), c)
+  ).thenApply(parts -> combine(parts.get(0), parts.get(1)));
+}
+
+// Consume third-party CompletionStage-returning APIs inside an async.java combinator.
+Asyncc.Parallel(List.of(
+    fromStage(db.queryAsync("SELECT ...")),
+    fromStage(redis.getAsync(key)),
+    fromStage(http.sendAsync(req))
+), (err, results) -> { /* ... */ });
+{% endhighlight %}
+</div>
+
+<div class="example">
+  <h2 class="example__heading">AsyncFut <span style="font-family: var(--font-mono); font-size: 14px; color: var(--fg-dim);">(v0.2.7+)</span></h2>
+  <p class="example__lede">Promise-returning sibling to <code>Asyncc</code>. Same combinator vocabulary, but each call returns a <code>CompletableFuture</code> instead of taking a final callback.</p>
+
+{% highlight java %}
+// Parallel: fan out N tasks, return a future of their ordered results.
+CompletableFuture<List<String>> both = AsyncFut.Parallel(List.of(
+    () -> CompletableFuture.supplyAsync(this::fetchA, exec),
+    () -> CompletableFuture.supplyAsync(this::fetchB, exec)
+));
+
+// ParallelLimit: bounded concurrency.
+CompletableFuture<List<Path>> downloaded = AsyncFut.ParallelLimit(8, downloads);
+
+// Series: sequential.
+CompletableFuture<List<Step>> chain = AsyncFut.Series(List.of(
+    () -> validate(req), () -> persist(req), () -> notify(req)
+));
+
+// Race: first completer wins.
+CompletableFuture<String> winner = AsyncFut.Race(List.of(
+    () -> fromPrimary(),
+    () -> fromReplica()
+));
+
+// Map: async transform preserving input order.
+CompletableFuture<List<Profile>> profiles =
+    AsyncFut.Map(userIds, id -> fetchProfileAsync(id));
+
+// Reduce: sequential async fold.
+CompletableFuture<BigDecimal> total =
+    AsyncFut.Reduce(txns, BigDecimal.ZERO, (acc, t) -> computeAsync(acc, t));
+
+// Times: N parallel iterations.
+CompletableFuture<List<Sample>> samples =
+    AsyncFut.Times(8, i -> generateAsync(i));
+
+// Each: per-element fire-and-forget; future completes when all done.
+CompletableFuture<Void> sent = AsyncFut.Each(users, u -> sendEmailAsync(u));
+
+// Compose with regular CompletableFuture operators.
+AsyncFut.Parallel(taskSuppliers)
+    .thenApply(parts -> combine(parts))
+    .thenCompose(combined -> store(combined))
+    .exceptionally(err -> { log.error("pipeline failed", err); return null; });
+{% endhighlight %}
+</div>
+
 <p style="margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--rule); color: var(--fg-muted); font-size: 15px;">
   Looking for full javadoc?
   See the <a href="{{ '/v/latest/index.html' | relative_url }}">latest javadoc</a> or the
-  <a href="{{ '/v/0.2.4/index.html' | relative_url }}">v0.2.4 snapshot</a>, or
+  <a href="{{ '/v/0.2.7/index.html' | relative_url }}">v0.2.7 snapshot</a>, or
   <a href="{{ site.repo_url }}">browse the source</a>.
 </p>
 

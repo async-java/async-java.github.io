@@ -130,6 +130,8 @@ description: A small, predictable, virtual-thread-friendly callback combinator l
       <span class="combinator">NeoQueue</span>
       <span class="combinator">NeoLock</span>
       <span class="combinator">NeoRwLock</span>
+      <span class="combinator">WrapFuture</span>
+      <span class="combinator">AsyncFut</span>
     </div>
     <p style="margin-top: 28px;"><a class="btn btn--ghost" href="{{ '/examples/' | relative_url }}">Examples for each &rarr;</a></p>
   </div>
