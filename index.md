@@ -231,7 +231,7 @@ Asyncc.ParallelLimit(8, fetchTasks, (err, results) -> {
 
     <p style="margin-top: 24px; color: var(--fg-muted); font-size: 15px;">For the full Loom-integration story —
       structured concurrency vs. callbacks, <code>ThreadLocal</code> vs <code>ScopedValue</code>, why <code>NeoLock</code>
-      is still relevant — see the <a href="{{ site.repo_url }}/blob/master/readme.md#project-loom-and-asyncjava">README's Project Loom section</a>.</p>
+      is still relevant — see the <a href="{{ site.repo_url }}/blob/main/readme.md#project-loom-and-asyncjava">README's Project Loom section</a>.</p>
   </div>
 </section>
 

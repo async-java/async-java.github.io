@@ -3,7 +3,7 @@
 Source for [async-java.github.io](https://async-java.github.io) — the docs site for
 [async.java](https://github.com/async-java/async.java).
 
-This is a Jekyll site. GitHub Pages auto-builds it from `master`.
+This is a Jekyll site. GitHub Pages auto-builds it from `main`.
 
 ## Local development
 
@@ -39,4 +39,4 @@ description: SEO description
 ---
 ```
 
-GitHub Pages will rebuild on push to `master`.
+GitHub Pages will rebuild on push to `main`.

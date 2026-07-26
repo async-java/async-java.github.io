@@ -212,7 +212,7 @@ No. The v0.2.x cycle fixed three real concurrency bugs that previously made the 
 
 Earlier benchmarks showed async.java at ~94.5 % delivery on 20-second runs at 500 msg/s. That was these bugs, not a load-test artefact. With all three fixes (v0.2.2 and later), delivery is 100 % through to saturation, and beyond saturation it stays 100 % up to the point where the executor itself is overloaded — which on this hardware is well past anything we'd push through one node.
 
-Each fix has a [reproducer test](https://github.com/async-java/async.java/tree/master/src/test/java/general) pinning it. The `MisuseTest` class adds 12 adversarial scenarios (cross-thread callbacks, double `cb.done`, sync throws, empty lists, short-circuit, nested composition) so future regressions surface fast.
+Each fix has a [reproducer test](https://github.com/async-java/async.java/tree/main/src/test/java/general) pinning it. The `MisuseTest` class adds 12 adversarial scenarios (cross-thread callbacks, double `cb.done`, sync throws, empty lists, short-circuit, nested composition) so future regressions surface fast.
 
 ## Project Loom integration
 
