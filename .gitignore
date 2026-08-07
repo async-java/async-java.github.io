@@ -6,3 +6,7 @@ _site/
 vendor/
 Gemfile.lock
 .DS_Store
+tmp
+temp
+tmp/worktrees
+temp/worktrees
