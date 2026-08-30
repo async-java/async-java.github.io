@@ -94,11 +94,25 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? "https://async-java.
           <span class="mark">{site.mark}</span>
           <span>{site.title}</span>
         </a>
-        <nav aria-label="Primary navigation">
+        <nav class="desktop-nav" aria-label="Primary navigation">
           <a href="#principles">Principles</a>
           <a href="#method">Method</a>
           <a href={`https://github.com/${site.org}`}>GitHub <span aria-hidden="true">↗</span></a>
+                  <a href="#access">Access</a>
+          <a href="https://user.async-java.github.io/">Log in</a>
+          <a class="nav-signup" href="https://auth.async-java.github.io/">Sign up</a>
         </nav>
+              <details class="mobile-nav">
+          <summary>Menu</summary>
+          <nav aria-label="Mobile navigation">
+            <a href="#principles">Principles</a>
+            <a href="#method">Method</a>
+            <a href="#access">Access</a>
+            <a href="https://user.async-java.github.io/">Log in</a>
+            <a href="https://org.async-java.github.io/">Organization access</a>
+            <a class="nav-signup" href="https://auth.async-java.github.io/">Sign up</a>
+          </nav>
+        </details>
       </header>
 
       <section class="hero" aria-labelledby="headline">
@@ -171,6 +185,18 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? "https://async-java.
         </ol>
       </section>
 
+      <section class="access" id="access" aria-labelledby="access-title">
+        <div class="section-heading">
+          <p class="section-number">03 / ACCESS</p>
+          <h2 id="access-title">One product. Clear account boundaries.</h2>
+        </div>
+        <div class="access-grid">
+          <article><span>INDIVIDUALS</span><h3>Return to your workspace</h3><p>Open the user application for your own Async Java activity and saved context.</p><a href="https://user.async-java.github.io/">User log in <span aria-hidden="true">↗</span></a></article>
+          <article><span>ORGANIZATIONS</span><h3>Coordinate a team</h3><p>Use the organization application for shared policy, membership, and operational work.</p><a href="https://org.async-java.github.io/">Organization access <span aria-hidden="true">↗</span></a></article>
+          <article><span>NEW ACCOUNTS</span><h3>Start through Shared Auth</h3><p>Account creation crosses the dedicated authentication boundary before product access is granted.</p><a href="https://auth.async-java.github.io/">Create an account <span aria-hidden="true">↗</span></a></article>
+        </div>
+      </section>
+
       <section class="closing" aria-label="Closing statement">
         <p>Concurrency becomes manageable when its shape is visible.</p>
         <a href={`https://github.com/${site.org}`}>github.com/{site.org} <span aria-hidden="true">↗</span></a>
@@ -205,6 +231,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? "https://async-java.
     font-family: var(--sans);
   }
   .masthead {
+    position: sticky; top: 0; z-index: 100; background: color-mix(in srgb, var(--paper) 94%, transparent); backdrop-filter: blur(16px);
     min-height: 5.5rem; display: flex; align-items: center; justify-content: space-between;
     gap: 2rem; padding: 0 4vw; border-bottom: 1px solid var(--rule);
   }
@@ -213,6 +240,18 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? "https://async-java.
   nav { display: flex; gap: clamp(1rem, 3vw, 2.5rem); font-family: var(--mono); font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; }
   nav a { text-decoration: none; padding: .7rem 0; border-bottom: 1px solid transparent; }
   nav a:hover { border-color: var(--accent); }
+  .nav-signup { padding-inline: .75rem; background: var(--ink); color: var(--paper); }
+  .mobile-nav { display: none; position: relative; font-family: var(--mono); }
+  .mobile-nav summary { cursor: pointer; padding: .65rem .8rem; border: 1px solid var(--rule); list-style: none; font-size: .7rem; text-transform: uppercase; letter-spacing: .08em; }
+  .mobile-nav summary::-webkit-details-marker { display: none; }
+  .mobile-nav nav { position: absolute; right: 0; top: calc(100% + .55rem); min-width: 14rem; padding: .75rem; background: var(--ink); color: var(--paper); box-shadow: 0 1.5rem 3rem rgba(0,0,0,.18); }
+  .access { display: grid; grid-template-columns: minmax(14rem, .55fr) minmax(0, 1.45fr); border-bottom: 1px solid var(--rule); }
+  .access-grid { display: grid; grid-template-columns: repeat(3, 1fr); }
+  .access-grid article { min-height: 20rem; padding: clamp(2rem, 4vw, 4rem) 2.5vw; border-right: 1px solid var(--rule); }
+  .access-grid article:last-child { border-right: 0; }
+  .access-grid article > span { color: var(--accent); font: .68rem/1 var(--mono); letter-spacing: .08em; }
+  .access-grid p { color: var(--muted); line-height: 1.65; }
+  .access-grid a { font: .72rem/1.4 var(--mono); text-underline-offset: .3rem; }
   .hero {
     display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(18rem, .85fr);
     min-height: 42rem; border-bottom: 1px solid var(--rule);
@@ -326,12 +365,16 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? "https://async-java.
     .hero { grid-template-columns: 1fr; }
     .hero-copy { border-right: 0; border-bottom: 1px solid var(--rule); }
     .instrument { width: min(38rem, calc(100% - 8vw)); justify-self: center; }
-    .principles, .method { grid-template-columns: 1fr; }
+    .principles, .method, .access { grid-template-columns: 1fr; }
     .section-heading { border-right: 0; border-bottom: 1px solid var(--rule); }
     .principle-list article { min-height: auto; }
   }
   @media (max-width: 680px) {
-    .masthead { align-items: flex-start; padding-block: 1.3rem; }
+    .masthead { align-items: center; padding-block: 1rem; }
+    .desktop-nav { display: none; }
+    .mobile-nav { display: block; margin-left: auto; }
+    .access-grid { grid-template-columns: 1fr; }
+    .access-grid article { min-height: 0; border-right: 0; border-bottom: 1px solid var(--rule); }
     nav { flex-direction: column; gap: .25rem; align-items: flex-end; }
     .hero { min-height: 0; }
     .hero-copy { padding: 4.5rem 4vw; }
