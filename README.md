@@ -1,42 +1,23 @@
 # async-java.github.io
 
-Source for [async-java.github.io](https://async-java.github.io) — the docs site for
-[async.java](https://github.com/async-java/async.java).
+The public Astro marketing site for **Async Java**.
 
-This is a Jekyll site. GitHub Pages auto-builds it from `main`.
+Compositional asynchronous control flow for Java, with Vert.x, Akka, futures, and reactive variants.
 
-## Local development
+The former Jekyll sources remain in Git as historical material. Maintained API documentation lives in the organization's dedicated `async-docs` repository.
 
-```bash
-bundle install
-bundle exec jekyll serve --livereload
+## Development
+
+Use Node.js 22.22.1 or newer.
+
+```sh
+npm ci
+npm run dev
+npm run build
 ```
 
-Then open <http://127.0.0.1:4000/>.
+Astro writes the production site to `dist/`. The committed GitHub Actions workflow builds pull requests and deploys the default branch to GitHub Pages.
 
-## Layout
+## Content standard
 
-- `index.md` — landing page
-- `examples.md` — one snippet per combinator
-- `blog.md` — blog index (lists `_posts/`)
-- `_posts/` — blog posts
-- `_layouts/`, `_includes/`, `assets/css/` — theme
-- `v/<version>/` — versioned javadoc snapshots, served as static assets
-
-## Adding a blog post
-
-Drop a markdown file in `_posts/` named `YYYY-MM-DD-slug.md` with this front matter:
-
-```yaml
----
-layout: post
-title: "Your title"
-subtitle: "Optional one-line subtitle."
-kicker: "Engineering · category"
-date: 2026-MM-DD
-reading_time: "N min read"
-description: SEO description
----
-```
-
-GitHub Pages will rebuild on push to `main`.
+Public claims must remain traceable to the organization's repositories, documentation, or planning context. Do not publish credentials, customer data, private operational details, or unreviewed legal language from this public repository.

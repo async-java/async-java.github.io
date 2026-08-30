@@ -10,3 +10,8 @@ tmp
 temp
 tmp/worktrees
 temp/worktrees
+
+# Astro
+node_modules/
+dist/
+.astro/
